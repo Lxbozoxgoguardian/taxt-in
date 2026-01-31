@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Bubbles</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #222;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20px;
+    }
+
+    #chat {
+      width: 700px;
+      height: 400px;
+      background: #111;
+      padding: 10px;
+      overflow-y: auto;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .bubble {
+      background: #444; /* gray bubble */
+      color: white;
+      padding: 10px 14px;
+      border-radius: 18px;
+      margin-bottom: 10px;
+      max-width: 80%;
+      position: relative;
+      word-wrap: break-word;
+    }
+
+    .bubble::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 10px;
+      width: 0;
+      height: 0;
+      border: 10px solid transparent;
+      border-top-color: #444;
+      border-bottom: 0;
+      border-left: 0;
+      margin-left: -5px;
+      margin-bottom: -10px;
+    }
+
+    #msg {
+      width: 600px;
+      padding: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 8px 12px;
+      font-size: 16px;
+      margin-left: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="chat"></div>
+  <input id="msg" placeholder="Type message here">
+  <button>Send</button>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("msg");
+    const button = document.querySelector("button");
+
+    // Connect to your server
+    const socket = new WebSocket("ws://localhost:8080");
+
+    // When server sends a message, display it
+    socket.onmessage = (event) => {
+      addBubble(event.data);
+    };
+
+    // Send message function
+    function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+      socket.send(text);
+      input.value = "";
+    }
+
+    // Add a bubble to the chat log
+    function addBubble(text) {
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.textContent = text;
+      chat.appendChild(bubble);
+      chat.scrollTop = chat.scrollHeight; // auto scroll
+    }
+
+    // Button click sends message
+    button.onclick = sendMessage;
+
+    // Enter key also sends
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+
+</body>
+</html>
