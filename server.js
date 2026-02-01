@@ -1,19 +1,23 @@
 const WebSocket = require("ws");
+const http = require("http");
 
-const wss = new WebSocket.Server({ port: 8080 });
-let messages = []; // stores chat history
+const PORT = process.env.PORT || 8080;
+
+const server = http.createServer();
+const wss = new WebSocket.Server({ server });
+
+let messages = [];
 
 wss.on("connection", (ws) => {
   console.log("Client connected");
 
-  // send old messages to new client
+  // send old messages
   messages.forEach(msg => ws.send(msg));
 
   ws.on("message", (data) => {
     const msg = data.toString();
     messages.push(msg);
 
-    // broadcast to all clients
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(msg);
@@ -22,4 +26,6 @@ wss.on("connection", (ws) => {
   });
 });
 
-console.log("Server running on ws://localhost:8080");
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
