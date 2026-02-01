@@ -76,7 +76,9 @@
     const button = document.querySelector("button");
 
     // Connect to your server
-    const socket = new WebSocket("ws://localhost:8080");
+  const socket = new WebSocket(
+  location.protocol === "https:" ? "wss://" + location.host : "ws://" + location.host
+);
 
     // When server sends a message, display it
     socket.onmessage = (event) => {
